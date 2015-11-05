@@ -50,8 +50,13 @@
 
 #pragma mark - 取消选中
 -(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-//    [self.btnArray makeObjectsPerformSelector:@selector(setSelected:)  withObject:@(NO)];    不好使了
+    NSMutableString *string = [NSMutableString string];
+    for (UIButton *btn in self.btnArray) {
+        [string appendFormat:@"%ld----", btn.tag];
+    }
+    NSLog(@"%@", string);//打印路径---沙盒
     
+//    [self.btnArray makeObjectsPerformSelector:@selector(setSelected:)  withObject:@(NO)];    不好使了
     [self.btnArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj setValue:@(NO) forKeyPath:@"selected"];
     }];
@@ -73,7 +78,13 @@
 - (UIButton *)buttonWithPoint:(CGPoint)point
 {
     for (UIButton *btn in self.subviews) {
-        if (CGRectContainsPoint(btn.frame, point)){ // 判断点在按钮上   ---前提是处于同一个坐标系
+        CGFloat centerWidth = 24;//圆心附近
+        CGPoint center = btn.center;
+        CGFloat x = center.x - centerWidth * 0.5;
+        CGFloat y = center.y - centerWidth * 0.5;
+        
+        CGRect frame = CGRectMake(x, y, centerWidth, centerWidth);
+        if (CGRectContainsPoint(frame, point)){ // 判断点在按钮上   ---前提是处于同一个坐标系
             return btn;
         }
     }
@@ -135,6 +146,8 @@
 -(void) setupSubView {
     for (int i = 0; i < 9; i++) {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.tag = i + 9000;
+        
         [button setImage:[UIImage imageNamed:@"gesture_node_normal"] forState:UIControlStateNormal];
         [button setImage:[UIImage imageNamed:@"gesture_node_highlighted"] forState:UIControlStateSelected];
         
