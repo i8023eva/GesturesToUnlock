@@ -26,6 +26,8 @@
 
 #pragma mark - 划线  setNeedsDisplay
 -(void)drawRect:(CGRect)rect {
+    if (self.btnArray.count == 0) return;
+    
     UIBezierPath *path = [UIBezierPath bezierPath];
     //BUtton 之间的连线
     [self.btnArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -44,6 +46,19 @@
     path.lineJoinStyle = kCGLineJoinRound;
     
     [path stroke];
+}
+
+#pragma mark - 取消选中
+-(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+//    [self.btnArray makeObjectsPerformSelector:@selector(setSelected:)  withObject:@(NO)];    不好使了
+    
+    [self.btnArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj setValue:@(NO) forKeyPath:@"selected"];
+    }];
+    
+    
+    [self.btnArray removeAllObjects];
+    [self setNeedsDisplay];
 }
 
 #pragma mark - 圆的选中
