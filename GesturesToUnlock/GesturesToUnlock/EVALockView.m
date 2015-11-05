@@ -8,8 +8,43 @@
 
 #import "EVALockView.h"
 
+@interface EVALockView ()
+//存储划过的 button
+@property (nonatomic, strong) NSMutableArray *btnArray;
+//最后一次连线的位置
+@property (nonatomic, assign) CGPoint moveP;
+@end
+
 @implementation EVALockView
 
+-(NSMutableArray *)btnArray {
+    if (_btnArray == nil) {
+        _btnArray = [NSMutableArray array];
+    }
+    return _btnArray;
+}
+
+#pragma mark - 划线  setNeedsDisplay
+-(void)drawRect:(CGRect)rect {
+    UIBezierPath *path = [UIBezierPath bezierPath];
+    //BUtton 之间的连线
+    [self.btnArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        UIButton *button = self.btnArray[idx];
+        if (idx == 0) {
+            [path moveToPoint:button.center];
+        }else {
+            [path addLineToPoint:button.center];
+        }
+    }];
+    //连完最后一个 button de 线
+    [path addLineToPoint:self.moveP];
+    
+    [[UIColor colorWithRed:0.502 green:1.000 blue:0.000 alpha:1.000] set];
+    path.lineWidth = 8.f;
+    path.lineJoinStyle = kCGLineJoinRound;
+    
+    [path stroke];
+}
 
 #pragma mark - 圆的选中
 // 获取触摸点
@@ -34,19 +69,26 @@
     CGPoint pos = [self pointWithTouches:touches];
     // 获取触摸按钮
     UIButton *btn = [self buttonWithPoint:pos];
-    if (btn) { // 有触摸按钮的时候才需要选中
+    if (btn && !btn.isSelected) { // 有触摸按钮的时候才需要选中    --- 不能重复选中
         btn.selected = YES;
+        [self.btnArray addObject:btn];
     }
 }
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     // 当前触摸点
     CGPoint pos = [self pointWithTouches:touches];
+    //
+    self.moveP = pos;
+    
     // 获取触摸按钮
     UIButton *btn = [self buttonWithPoint:pos];
-    if (btn) { // 有触摸按钮的时候才需要选中
+    if (btn && !btn.isSelected) { // 有触摸按钮的时候才需要选中
         btn.selected = YES;
+        [self.btnArray addObject:btn];
     }
+    //重绘
+    [self setNeedsDisplay];
 }
 #pragma mark - 布局
 -(void)layoutSubviews {
